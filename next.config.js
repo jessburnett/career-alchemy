@@ -5,7 +5,7 @@ module.exports = {
     return [
       {
         source: "/github",
-        destination: "https://github.com/jessburnett/career-alchemy",
+        destination: "https://github.com/Nutlope/twitterbio",
         permanent: false,
       },
       {

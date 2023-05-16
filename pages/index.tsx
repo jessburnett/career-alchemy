@@ -3,6 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
+import DropDown, { VibeType } from "../components/DropDown";
 import Footer from "../components/Footer";
 import Github from "../components/GitHub";
 import Header from "../components/Header";
@@ -10,30 +11,30 @@ import LoadingDots from "../components/LoadingDots";
 
 const Home: NextPage = () => {
   const [loading, setLoading] = useState(false);
-  const [resume, setResume] = useState("");
-  const [posting, setPosting] = useState<PostingType>("Professional");
-  const [generatedResumes, setGeneratedResumes] = useState<String>("");
+  const [bio, setBio] = useState("");
+  const [vibe, setVibe] = useState<VibeType>("Professional");
+  const [generatedBios, setGeneratedBios] = useState<String>("");
 
-  const ResumeRef = useRef<null | HTMLDivElement>(null);
+  const bioRef = useRef<null | HTMLDivElement>(null);
 
-  const scrollToResumes = () => {
-    if (ResumeRef.current !== null) {
-      ResumeRef.current.scrollIntoView({ behavior: "smooth" });
+  const scrollToBios = () => {
+    if (bioRef.current !== null) {
+      bioRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  const prompt = `Generate 2 ${posting} twitter Resumegraphies with no hashtags and clearly labeled "1." and "2.". ${
-    posting === "Funny"
+  const prompt = `Generate 2 ${vibe} twitter biographies with no hashtags and clearly labeled "1." and "2.". ${
+    vibe === "Funny"
       ? "Make sure there is a joke in there and it's a little ridiculous."
       : null
   }
-      Make sure each generated Resumegraphy is less than 160 characters, has short sentences that are found in Twitter Resumes, and base them on this context: ${resume}${
-    resume.slice(-1) === "." ? "" : "."
+      Make sure each generated biography is less than 160 characters, has short sentences that are found in Twitter bios, and base them on this context: ${bio}${
+    bio.slice(-1) === "." ? "" : "."
   }`;
 
-  const generateResume = async (e: any) => {
+  const generateBio = async (e: any) => {
     e.preventDefault();
-    setGeneratedResumes("");
+    setGeneratedBios("");
     setLoading(true);
     const response = await fetch("/api/generate", {
       method: "POST",
@@ -63,16 +64,16 @@ const Home: NextPage = () => {
       const { value, done: doneReading } = await reader.read();
       done = doneReading;
       const chunkValue = decoder.decode(value);
-      setGeneratedResumes((prev) => prev + chunkValue);
+      setGeneratedBios((prev) => prev + chunkValue);
     }
-    scrollToResumes();
+    scrollToBios();
     setLoading(false);
   };
 
   return (
     <div className="flex max-w-5xl mx-auto flex-col items-center justify-center py-2 min-h-screen">
       <Head>
-        <title>Resume/Posting Analysis</title>
+        <title>Twitter Bio Generator</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -80,7 +81,7 @@ const Home: NextPage = () => {
       <main className="flex flex-1 w-full flex-col items-center justify-center text-center px-4 mt-12 sm:mt-20">
         <a
           className="flex max-w-fit items-center justify-center space-x-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-600 shadow-md transition-colors hover:bg-gray-100 mb-5"
-          href="https://github.com/jessburnett/career-alchemy"
+          href="https://github.com/Nutlope/twitterbio"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -88,8 +89,9 @@ const Home: NextPage = () => {
           <p>Star on GitHub</p>
         </a>
         <h1 className="sm:text-6xl text-4xl max-w-[708px] font-bold text-slate-900">
-          Analyze Compatibility
+          Generate your next Twitter bio using chatGPT
         </h1>
+        <p className="text-slate-500 mt-5">47,118 bios generated so far.</p>
         <div className="max-w-xl w-full">
           <div className="flex mt-10 items-center space-x-3">
             <Image
@@ -100,45 +102,36 @@ const Home: NextPage = () => {
               className="mb-5 sm:mb-0"
             />
             <p className="text-left font-medium">
-              Copy your current resume.
+              Copy your current bio{" "}
+              <span className="text-slate-500">
+                (or write a few sentences about yourself)
+              </span>
+              .
             </p>
           </div>
           <textarea
-            value={resume}
-            onChange={(e) => setResume(e.target.value)}
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
             rows={4}
             className="w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black my-5"
             placeholder={
               "e.g. Senior Developer Advocate @vercel. Tweeting about web development, AI, and React / Next.js. Writing nutlope.substack.com."
             }
           />
-          <div className="flex mt-10 items-center space-x-3">
-            <Image
-              src="/2-black.png"
-              width={30}
-              height={30}
-              alt="1 icon"
-              className="mb-5 sm:mb-0"
-            />
-            <p className="text-left font-medium">
-              Copy the current job posting.
-            </p>
+          <div className="flex mb-5 items-center space-x-3">
+            <Image src="/2-black.png" width={30} height={30} alt="1 icon" />
+            <p className="text-left font-medium">Select your vibe.</p>
           </div>
-          <textarea
-            value={posting}
-            onChange={(e) => setResume(e.target.value)}
-            rows={4}
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black my-5"
-            placeholder={
-              "e.g. Senior Developer Advocate @vercel. Tweeting about web development, AI, and React / Next.js. Writing nutlope.substack.com."
-            }
-          />
+          <div className="block">
+            <DropDown vibe={vibe} setVibe={(newVibe) => setVibe(newVibe)} />
+          </div>
+
           {!loading && (
             <button
               className="bg-black rounded-xl text-white font-medium px-4 py-2 sm:mt-10 mt-8 hover:bg-black/80 w-full"
-              onClick={(e) => generateResume(e)}
+              onClick={(e) => generateBio(e)}
             >
-              Analyze Compatibility &rarr;
+              Generate your bio &rarr;
             </button>
           )}
           {loading && (
@@ -157,33 +150,33 @@ const Home: NextPage = () => {
         />
         <hr className="h-px bg-gray-700 border-1 dark:bg-gray-700" />
         <div className="space-y-10 my-10">
-          {generatedResumes && (
+          {generatedBios && (
             <>
               <div>
                 <h2
                   className="sm:text-4xl text-3xl font-bold text-slate-900 mx-auto"
-                  ref={ResumeRef}
+                  ref={bioRef}
                 >
-                  Your generated Resumes
+                  Your generated bios
                 </h2>
               </div>
               <div className="space-y-8 flex flex-col items-center justify-center max-w-xl mx-auto">
-                {generatedResumes
-                  .substring(generatedResumes.indexOf("1") + 3)
+                {generatedBios
+                  .substring(generatedBios.indexOf("1") + 3)
                   .split("2.")
-                  .map((generatedResume) => {
+                  .map((generatedBio) => {
                     return (
                       <div
                         className="bg-white rounded-xl shadow-md p-4 hover:bg-gray-100 transition cursor-copy border"
                         onClick={() => {
-                          navigator.clipboard.writeText(generatedResume);
-                          toast("Resume copied to clipboard", {
+                          navigator.clipboard.writeText(generatedBio);
+                          toast("Bio copied to clipboard", {
                             icon: "✂️",
                           });
                         }}
-                        key={generatedResume}
+                        key={generatedBio}
                       >
-                        <p>{generatedResume}</p>
+                        <p>{generatedBio}</p>
                       </div>
                     );
                   })}
